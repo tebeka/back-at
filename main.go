@@ -77,7 +77,8 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.Runes[0] == 'q' {
+		switch msg.String() {
+		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
 		return m, nil
@@ -90,7 +91,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tickMsg:
-		m.percent = float64(time.Now().Sub(m.start)) / m.duration
+		m.percent = float64(time.Since(m.start)) / m.duration
 
 		if m.percent > 1.0 {
 			m.percent = 1.0
