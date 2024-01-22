@@ -22,15 +22,26 @@ const (
 var (
 	prefix  = "☕ "
 	padding = utf8.RuneCountInString(prefix)
+	version = "0.1.0"
+
+	options struct {
+		showVersion bool
+	}
 )
 
 func main() {
 	flag.Usage = func() {
 		name := path.Base(os.Args[0])
-		fmt.Fprintf(os.Stderr, "usage: %s HH:MM (or HH:MMpm)\n", name)
+		fmt.Fprintf(os.Stderr, "usage: %s HH:MM (or HH:MMpm)\n\nOptions:\n", name)
 		flag.PrintDefaults()
 	}
+	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
 	flag.Parse()
+
+	if options.showVersion {
+		fmt.Printf("%s version %s\n", path.Base(os.Args[0]), version)
+		os.Exit(0)
+	}
 
 	if flag.NArg() != 1 {
 		fmt.Fprintf(os.Stderr, "error: wrong number of arguments\n")
