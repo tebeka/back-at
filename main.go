@@ -27,7 +27,7 @@ var (
 func main() {
 	flag.Usage = func() {
 		name := path.Base(os.Args[0])
-		fmt.Fprintf(os.Stderr, "usage: %s HH:MM\n", name)
+		fmt.Fprintf(os.Stderr, "usage: %s HH:MM (or HH:MMpm)\n", name)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
