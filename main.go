@@ -20,12 +20,11 @@ const (
 )
 
 var (
-	prefix  = "☕ "
-	padding = utf8.RuneCountInString(prefix)
 	version = "0.1.0"
 
 	options struct {
 		showVersion bool
+		prefix      string
 	}
 )
 
@@ -36,6 +35,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
+	flag.StringVar(&options.prefix, "prefix", "☕ ", "progress bar prefix")
 	flag.Parse()
 
 	if options.showVersion {
@@ -95,6 +95,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.WindowSizeMsg:
+		padding := utf8.RuneCountInString(options.prefix)
 		m.progress.Width = msg.Width - padding*2 - 4
 		if m.progress.Width > maxWidth {
 			m.progress.Width = maxWidth
@@ -116,7 +117,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return "☕ " + m.progress.ViewAs(m.percent) + "\n"
+	return options.prefix + m.progress.ViewAs(m.percent) + "\n"
 }
 
 func tickCmd() tea.Cmd {
