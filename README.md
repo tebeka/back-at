@@ -8,6 +8,12 @@
 ```
 $ back-at -h
 usage: back-at HH:MM (or HH:MMpm)
+
+Options:
+  -prefix string
+    	progress bar prefix (default "☕ ")
+  -version
+    	show version and exit
 ```
 
 ## Example
