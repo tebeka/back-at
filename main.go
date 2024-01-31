@@ -64,7 +64,7 @@ func main() {
 	m := model{
 		duration: float64(duration),
 		start:    start,
-		progress: progress.New(),
+		progress: progress.New(progress.WithoutPercentage()),
 	}
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %s", err)
@@ -96,7 +96,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		padding := utf8.RuneCountInString(options.prefix)
-		m.progress.Width = msg.Width - padding*2 - 4
+		m.progress.Width = msg.Width - padding*2 - 6
 		if m.progress.Width > maxWidth {
 			m.progress.Width = maxWidth
 		}
@@ -116,8 +116,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
+func (m model) left() string {
+	d := time.Duration(m.duration) - time.Since(m.start)
+	return fmt.Sprintf("%02d:%02d", int(d.Minutes()), int(d.Seconds())%60)
+}
+
 func (m model) View() string {
-	return options.prefix + m.progress.ViewAs(m.percent) + "\n"
+	return options.prefix + m.progress.ViewAs(m.percent) + " " + m.left() + "\n"
 }
 
 func tickCmd() tea.Cmd {
