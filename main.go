@@ -133,13 +133,14 @@ func tickCmd() tea.Cmd {
 
 var layouts = []string{
 	"15:04",
+	"15PM",
 	time.Kitchen,
 }
 
 func parseTime(s string) (time.Time, error) {
 	us := strings.ToUpper(s)
 	for _, l := range layouts {
-		t, err := time.Parse(l, us)
+		t, err := time.ParseInLocation(l, us, time.Local)
 		if err != nil {
 			continue
 		}
