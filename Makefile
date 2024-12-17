@@ -26,3 +26,6 @@ release-patch:
 release-minor:
 	git tag $(shell svu minor)
 	git push --tags
+
+build:
+	goreleaser build --snapshot --clean

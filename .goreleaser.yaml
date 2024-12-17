@@ -6,5 +6,16 @@ builds:
       - darwin_arm64
       - darwin_amd64
       - windows_amd64
+    binary: back-at
+    id: back-at
+  - env:
+      - CGO_ENABLED=0
+    targets:
+      - linux_amd64
+      - darwin_arm64
+      - darwin_amd64
+      - windows_amd64
+    binary: back-in
+    id: back-in
 changelog:
   sort: asc

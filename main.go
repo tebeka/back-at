@@ -28,10 +28,24 @@ var (
 	}
 )
 
+const (
+	atHelp = "usage: %s HH:MM (or HH:MMpm)\n\nOptions:\n"
+	inHelp = "usage: %s DURATION (e.g. 15m)\n\nOptions:\n"
+)
+
 func main() {
+	progName := path.Base(os.Args[0])
+	usage := atHelp
+	switch progName {
+	case "back-at":
+		usage = atHelp
+	case "back-in":
+		usage = inHelp
+	}
+
 	flag.Usage = func() {
 		name := path.Base(os.Args[0])
-		fmt.Fprintf(os.Stderr, "usage: %s HH:MM (or HH:MMpm)\n\nOptions:\n", name)
+		fmt.Fprintf(os.Stderr, usage, name)
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(&options.showVersion, "version", false, "show version and exit")
@@ -48,7 +62,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	end, err := parseTime(flag.Arg(0))
+	var (
+		end time.Time
+		err error
+	)
+
+	if usage == atHelp {
+		end, err = parseTime(flag.Arg(0))
+	} else {
+		end, err = parseDuartion(flag.Arg(0))
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", err)
 		os.Exit(1)
@@ -151,4 +175,17 @@ func parseTime(s string) (time.Time, error) {
 	}
 
 	return time.Time{}, fmt.Errorf("unknown time format: %q", s)
+}
+
+func parseDuartion(s string) (time.Time, error) {
+	d, err := time.ParseDuration(s)
+	var zt time.Time
+	if err != nil {
+		return zt, err
+	}
+	if d <= 0 {
+		return zt, fmt.Errorf("%v: bad duration", d)
+	}
+
+	return time.Now().Add(d), nil
 }
