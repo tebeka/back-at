@@ -16,8 +16,12 @@ import (
 )
 
 const (
-	maxWidth = 80
+	maxWidth      = 80
+	flashDuration = 200 * time.Millisecond
+	totalFlashes  = 6 // for 3 full on-off cycles
 )
+
+type flashMsg struct{}
 
 var (
 	version = "0.3.0"
@@ -97,10 +101,13 @@ func main() {
 }
 
 type model struct {
-	start    time.Time
-	duration float64
-	percent  float64
-	progress progress.Model
+	start      time.Time
+	duration   float64
+	percent    float64
+	progress   progress.Model
+	isFlashing bool
+	flashCount int
+	showBar    bool
 }
 
 type tickMsg time.Time
@@ -126,11 +133,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		m.percent = float64(time.Since(m.start)) / m.duration
 
-		if m.percent > 1.0 {
+		// Check if timer is complete
+		if m.percent >= 1.0 && !m.isFlashing {
 			m.percent = 1.0
-			return m, tea.Quit
+			m.isFlashing = true
+			m.flashCount = 0
+			m.showBar = true // Start with bar visible
+			// Start flashing
+			return m, tea.Tick(flashDuration, func(t time.Time) tea.Msg { return flashMsg{} })
 		}
-		return m, tickCmd()
+
+		if m.isFlashing {
+			// If flashing, don't update progress or schedule normal ticks
+			return m, nil
+		}
+
+		// If still running and not yet flashing
+		if m.percent < 1.0 {
+			return m, tickCmd()
+		}
+		// This case should ideally not be reached if logic is correct,
+		// but as a fallback, quit if percent is >= 1.0 and not caught by flashing logic.
+		return m, tea.Quit
+
+	case flashMsg:
+		if !m.isFlashing { // Should not happen if logic is correct
+			return m, nil
+		}
+		m.flashCount++
+		m.showBar = !m.showBar // Toggle visibility
+		if m.flashCount >= totalFlashes {
+			return m, tea.Quit // Quit after enough flashes
+		}
+		// Schedule next flash
+		return m, tea.Tick(flashDuration, func(t time.Time) tea.Msg { return flashMsg{} })
 
 	default:
 		return m, nil
@@ -143,7 +179,13 @@ func (m model) left() string {
 }
 
 func (m model) View() string {
-	return options.prefix + m.progress.ViewAs(m.percent) + " " + m.left() + "\n"
+	barView := m.progress.ViewAs(m.percent)
+	if m.isFlashing && !m.showBar {
+		// Replace bar with spaces of the same width
+		spaceCount := utf8.RuneCountInString(barView)
+		return options.prefix + strings.Repeat(" ", spaceCount) + " " + m.left() + "\n"
+	}
+	return options.prefix + barView + " " + m.left() + "\n"
 }
 
 func tickCmd() tea.Cmd {
