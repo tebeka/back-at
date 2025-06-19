@@ -120,10 +120,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.WindowSizeMsg:
 		padding := utf8.RuneCountInString(options.prefix)
-		m.progress.Width = msg.Width - padding*2 - 6
-		if m.progress.Width > maxWidth {
-			m.progress.Width = maxWidth
-		}
+		m.progress.Width = min(msg.Width-padding*2-6, maxWidth)
 		return m, nil
 
 	case tickMsg:
