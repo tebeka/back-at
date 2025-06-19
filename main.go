@@ -17,14 +17,14 @@ import (
 
 const (
 	maxWidth      = 80
-	flashDuration = 200 * time.Millisecond
-	totalFlashes  = 6 // for 3 full on-off cycles
+	flashDuration = 300 * time.Millisecond
+	totalFlashes  = 10 // for 5 full on-off cycles
 )
 
 type flashMsg struct{}
 
 var (
-	version = "0.3.0"
+	version = "0.5.2"
 
 	options struct {
 		showVersion bool
