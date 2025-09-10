@@ -174,7 +174,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) left() string {
-	d := time.Duration(m.duration) - time.Since(m.start)
+	d := max(time.Duration(m.duration)-time.Since(m.start), 0)
 	return fmt.Sprintf("%02d:%02d", int(d.Minutes())%60, int(d.Seconds())%60)
 }
 
